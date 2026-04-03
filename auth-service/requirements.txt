@@ -1,2 +1,5 @@
 flask
-pyjwt
+PyJWT
+flask-cors
+prometheus-flask-exporter
+gunicorn

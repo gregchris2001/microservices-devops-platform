@@ -2,6 +2,9 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: postgres
+  namespace: devops-platform
+  labels:
+    app: postgres
 spec:
   replicas: 1
   selector:
@@ -14,14 +17,51 @@ spec:
     spec:
       containers:
       - name: postgres
-        image: postgres:15
+        image: postgres:15-alpine
         env:
         - name: POSTGRES_USER
-          value: admin
+          valueFrom:
+            configMapKeyRef:
+              name: app-config
+              key: DB_USER
         - name: POSTGRES_PASSWORD
-          value: password
+          valueFrom:
+            secretKeyRef:
+              name: app-secrets
+              key: POSTGRES_PASSWORD
         - name: POSTGRES_DB
-          value: devopsdb
+          valueFrom:
+            configMapKeyRef:
+              name: app-config
+              key: DB_NAME
         ports:
         - containerPort: 5432
-
+        resources:
+          requests:
+            memory: "256Mi"
+            cpu: "100m"
+          limits:
+            memory: "512Mi"
+            cpu: "500m"
+        volumeMounts:
+        - name: postgres-storage
+          mountPath: /var/lib/postgresql/data
+        livenessProbe:
+          exec:
+            command:
+            - pg_isready
+            - -U
+            - admin
+          initialDelaySeconds: 30
+          periodSeconds: 10
+        readinessProbe:
+          exec:
+            command:
+            - pg_isready
+            - -U
+            - admin
+          initialDelaySeconds: 5
+          periodSeconds: 5
+      volumes:
+      - name: postgres-storage
+        emptyDir: {}

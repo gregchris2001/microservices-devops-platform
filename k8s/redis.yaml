@@ -2,6 +2,9 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: redis
+  namespace: devops-platform
+  labels:
+    app: redis
 spec:
   replicas: 1
   selector:
@@ -14,7 +17,28 @@ spec:
     spec:
       containers:
       - name: redis
-        image: redis:7
+        image: redis:7-alpine
         ports:
         - containerPort: 6379
-
+        args: ["--appendonly", "yes"]
+        resources:
+          requests:
+            memory: "64Mi"
+            cpu: "50m"
+          limits:
+            memory: "128Mi"
+            cpu: "250m"
+        livenessProbe:
+          exec:
+            command:
+            - redis-cli
+            - ping
+          initialDelaySeconds: 15
+          periodSeconds: 10
+        readinessProbe:
+          exec:
+            command:
+            - redis-cli
+            - ping
+          initialDelaySeconds: 5
+          periodSeconds: 5
