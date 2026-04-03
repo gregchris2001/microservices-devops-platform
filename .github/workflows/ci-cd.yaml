@@ -7,7 +7,7 @@ on:
     branches: [ main ]
 
 env:
-  DOCKER_USERNAME: gregchris
+  DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
   REGISTRY: docker.io
 
 jobs:
