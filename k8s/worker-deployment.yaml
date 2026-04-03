@@ -20,6 +20,7 @@ spec:
       containers:
       - name: worker-service
         image: gregchris/worker-service:latest
+        imagePullPolicy: IfNotPresent
         resources:
           requests:
             memory: "64Mi"
@@ -30,14 +31,7 @@ spec:
         envFrom:
         - configMapRef:
             name: app-config
-        livenessProbe:
-          exec:
-            command:
-            - python
-            - -c
-            - "import redis; r = redis.Redis(host='redis'); r.ping()"
-          initialDelaySeconds: 60
-          periodSeconds: 30
-          failureThreshold: 5
+        # No liveness probe — worker is a background loop, not a web server.
+        # It self-heals via its own Redis reconnection logic.
       restartPolicy: Always
       terminationGracePeriodSeconds: 30
