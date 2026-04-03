@@ -1,0 +1,32 @@
+{{- if .Values.workerService.enabled }}
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: worker-service
+  namespace: {{ .Values.global.namespace }}
+  labels:
+    app: worker-service
+    chart: {{ .Chart.Name }}-{{ .Chart.Version }}
+spec:
+  replicas: {{ .Values.workerService.replicaCount }}
+  selector:
+    matchLabels:
+      app: worker-service
+  template:
+    metadata:
+      labels:
+        app: worker-service
+    spec:
+      containers:
+      - name: worker-service
+        image: "{{ .Values.workerService.image.repository }}:{{ .Values.workerService.image.tag | default .Values.global.imageTag }}"
+        imagePullPolicy: {{ .Values.workerService.image.pullPolicy }}
+        resources:
+          {{- toYaml .Values.workerService.resources | nindent 10 }}
+        env:
+        - name: REDIS_HOST
+          value: "{{ .Release.Name }}-redis-master"
+        - name: REDIS_PORT
+          value: "6379"
+      terminationGracePeriodSeconds: 30
+{{- end }}

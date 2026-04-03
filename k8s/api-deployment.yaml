@@ -2,6 +2,10 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: api-service
+  namespace: devops-platform
+  labels:
+    app: api-service
+    version: "2.0"
 spec:
   replicas: 2
   selector:
@@ -11,19 +15,46 @@ spec:
     metadata:
       labels:
         app: api-service
+        version: "2.0"
+      annotations:
+        prometheus.io/scrape: "true"
+        prometheus.io/port: "3000"
+        prometheus.io/path: "/metrics"
     spec:
       containers:
       - name: api-service
-        image: jhon027/api-service:latest
+        image: gregchris/api-service:latest
         ports:
         - containerPort: 3000
+          name: http
+        resources:
+          requests:
+            memory: "128Mi"
+            cpu: "100m"
+          limits:
+            memory: "256Mi"
+            cpu: "500m"
+        envFrom:
+        - configMapRef:
+            name: app-config
         env:
-        - name: DB_HOST
-          value: postgres
-        - name: DB_USER
-          value: admin
         - name: DB_PASSWORD
-          value: password
-        - name: DB_NAME
-          value: devopsdb
-
+          valueFrom:
+            secretKeyRef:
+              name: app-secrets
+              key: DB_PASSWORD
+        livenessProbe:
+          httpGet:
+            path: /health
+            port: 3000
+          initialDelaySeconds: 30
+          periodSeconds: 15
+          failureThreshold: 3
+        readinessProbe:
+          httpGet:
+            path: /health
+            port: 3000
+          initialDelaySeconds: 10
+          periodSeconds: 10
+          failureThreshold: 3
+      restartPolicy: Always

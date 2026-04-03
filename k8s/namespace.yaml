@@ -1,0 +1,8 @@
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: devops-platform
+  labels:
+    name: devops-platform
+    environment: production
+    managed-by: kubectl

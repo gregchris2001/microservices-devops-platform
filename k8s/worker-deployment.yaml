@@ -2,6 +2,10 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: worker-service
+  namespace: devops-platform
+  labels:
+    app: worker-service
+    version: "2.0"
 spec:
   replicas: 1
   selector:
@@ -11,8 +15,29 @@ spec:
     metadata:
       labels:
         app: worker-service
+        version: "2.0"
     spec:
       containers:
       - name: worker-service
-        image: jhon027/worker-service:latest
-      
+        image: gregchris/worker-service:latest
+        resources:
+          requests:
+            memory: "64Mi"
+            cpu: "50m"
+          limits:
+            memory: "128Mi"
+            cpu: "200m"
+        envFrom:
+        - configMapRef:
+            name: app-config
+        livenessProbe:
+          exec:
+            command:
+            - python
+            - -c
+            - "import redis; r = redis.Redis(host='redis'); r.ping()"
+          initialDelaySeconds: 30
+          periodSeconds: 30
+          failureThreshold: 3
+      restartPolicy: Always
+      terminationGracePeriodSeconds: 30
