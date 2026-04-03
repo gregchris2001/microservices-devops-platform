@@ -14,6 +14,8 @@ jest.mock('ioredis', () => {
   return jest.fn().mockImplementation(() => ({
     rpush: jest.fn().mockResolvedValue(1),
     llen: jest.fn().mockResolvedValue(0),
+    on: jest.fn(),
+    quit: jest.fn().mockResolvedValue('OK'),
   }));
 });
 
