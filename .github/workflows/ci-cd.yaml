@@ -28,7 +28,7 @@ jobs:
 
       - name: Install dependencies
         working-directory: ./api-service
-        run: npm ci
+        run: npm install
 
       - name: Run unit tests
         working-directory: ./api-service
