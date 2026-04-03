@@ -188,18 +188,22 @@ app.get("/jobs", async (req, res) => {
   }
 });
 
-const server = app.listen(PORT, () => {
-  console.log(`✅ API Service running on port ${PORT}`);
-});
 
-// Graceful shutdown
-process.on("SIGTERM", () => {
-  console.log("SIGTERM received. Shutting down gracefully...");
-  server.close(() => {
-    pool.end();
-    redis.quit();
-    process.exit(0);
+// Only start server when run directly (not when imported by Jest)
+if (require.main === module) {
+  const server = app.listen(PORT, () => {
+    console.log(`✅ API Service running on port ${PORT}`);
   });
-});
+
+  // Graceful shutdown
+  process.on("SIGTERM", () => {
+    console.log("SIGTERM received. Shutting down gracefully...");
+    server.close(() => {
+      pool.end();
+      redis.quit();
+      process.exit(0);
+    });
+  });
+}
 
 module.exports = app;
