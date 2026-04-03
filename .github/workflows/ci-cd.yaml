@@ -7,7 +7,7 @@ on:
     branches: [ main ]
 
 env:
-  DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
+  DOCKER_USERNAME: gregchris
   REGISTRY: docker.io
 
 jobs:
@@ -118,6 +118,10 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
+
+      - name: Debug image name
+        run: |
+          echo "Building image ${{ env.DOCKER_USERNAME }}/${{ matrix.service.name }}"
 
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
